@@ -13,11 +13,16 @@ public class BulletControlSystem implements IEntityProcessingService, BulletSPI 
     public void process(GameData gameData, World world) {
 
         for (Entity bullet : world.getEntities(Bullet.class)) {
-            double changeX = Math.cos(Math.toRadians(bullet.getRotation()) + 2);
-            double changeY = Math.sin(Math.toRadians(bullet.getRotation()) + 2);
+            double changeX = Math.cos(Math.toRadians(bullet.getRotation()));
+            double changeY = Math.sin(Math.toRadians(bullet.getRotation()));
             bullet.setX(bullet.getX() + changeX);
             bullet.setY(bullet.getY() + changeY);
             System.out.println(bullet.getX() + " " + bullet.getY());
+
+            if (bullet.getX() < -4 || bullet.getX() > gameData.getDisplayWidth()+4 ||
+                bullet.getY() < -4 || bullet.getY() > gameData.getDisplayHeight()+4) {
+                world.removeEntity(bullet);
+            }
         }
     }
 
@@ -32,7 +37,7 @@ public class BulletControlSystem implements IEntityProcessingService, BulletSPI 
     }
 
     private void setShape(Entity entity) {
-        entity.setPolygonCoordinates(-5,-5,10,0,-5,5);
+        entity.setPolygonCoordinates(-2,-2,-2,2,2,2,2,-2);
     }
 
 }
