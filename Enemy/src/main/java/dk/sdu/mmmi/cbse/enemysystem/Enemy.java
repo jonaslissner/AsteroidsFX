@@ -10,11 +10,11 @@ public class Enemy extends Entity {
     private boolean isTurningLeft = false;
     private boolean isTurningRight = false;
 
-    public void setTurningLeft(boolean isTurning){
-        this.isTurningLeft = isTurning;
+    public void setTurningLeft(boolean isTurningLeft){
+        this.isTurningLeft = isTurningLeft;
     }
-    public void setTurningRight(boolean isTurning){
-        this.isTurningRight = isTurning;
+    public void setTurningRight(boolean isTurningRight){
+        this.isTurningRight = isTurningRight;
     }
     public boolean isTurningRight(){
         return isTurningRight;
