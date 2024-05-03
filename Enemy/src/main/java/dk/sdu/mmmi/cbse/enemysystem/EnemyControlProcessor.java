@@ -1,10 +1,8 @@
 package dk.sdu.mmmi.cbse.enemysystem;
 
-import dk.sdu.mmmi.cbse.common.bullet.Bullet;
 import dk.sdu.mmmi.cbse.common.bullet.BulletSPI;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
-import dk.sdu.mmmi.cbse.common.data.GameKeys;
 import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 
@@ -14,7 +12,7 @@ import java.util.ServiceLoader;
 import static java.util.stream.Collectors.toList;
 import java.util.Random;
 
-public class EnemyControlSystem implements IEntityProcessingService {
+public class EnemyControlProcessor implements IEntityProcessingService {
     private static final int RANDOM_DIRECTION_THRESHOLD = 25;
     private static final int STOP_TURNING_THRESHOLD = 25;
     private static final int SHOOT_THRESHOLD = 150;
@@ -72,15 +70,19 @@ public class EnemyControlSystem implements IEntityProcessingService {
 
     private void ensureEnemyBounds(Enemy enemy, GameData gameData) {
         if (enemy.getX() < 0) {
-            enemy.setX(gameData.getDisplayWidth());
-        } else if (enemy.getX() > gameData.getDisplayWidth()) {
-            enemy.setX(0);
+            enemy.setX(enemy.getX() + gameData.getDisplayWidth());
+        }
+
+        if (enemy.getX() > gameData.getDisplayWidth()) {
+            enemy.setX(enemy.getX() % gameData.getDisplayWidth());
         }
 
         if (enemy.getY() < 0) {
-            enemy.setY(gameData.getDisplayHeight());
-        } else if (enemy.getY() > gameData.getDisplayHeight()) {
-            enemy.setY(0);
+            enemy.setY(enemy.getY() + gameData.getDisplayHeight());
+        }
+
+        if (enemy.getY() > gameData.getDisplayHeight()) {
+            enemy.setY(enemy.getY() % gameData.getDisplayHeight());
         }
     }
 

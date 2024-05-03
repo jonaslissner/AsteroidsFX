@@ -20,9 +20,10 @@ public class AsteroidProcessor implements IEntityProcessingService {
 
             asteroid.setX(asteroid.getX() + changeX * 0.5);
             asteroid.setY(asteroid.getY() + changeY * 0.5);
+            System.out.println("Asteroid: " + asteroid.getX() + " " + asteroid.getY() + " " + asteroid.getRotation());
 
             if (asteroid.getX() < 0) {
-                asteroid.setX(asteroid.getX() - gameData.getDisplayWidth());
+                asteroid.setX(asteroid.getX() + gameData.getDisplayWidth());
             }
 
             if (asteroid.getX() > gameData.getDisplayWidth()) {
@@ -30,13 +31,18 @@ public class AsteroidProcessor implements IEntityProcessingService {
             }
 
             if (asteroid.getY() < 0) {
-                asteroid.setY(asteroid.getY() - gameData.getDisplayHeight());
+                asteroid.setY(asteroid.getY() + gameData.getDisplayHeight());
             }
 
             if (asteroid.getY() > gameData.getDisplayHeight()) {
                 asteroid.setY(asteroid.getY() % gameData.getDisplayHeight());
             }
-
+            if(asteroid.getIsHit()) {
+                if(asteroid.getRadius() > 4) {
+                    asteroidSplitter.splitAsteroid(asteroid, world);
+                }
+                world.removeEntity(asteroid);
+            }
         }
 
     }
