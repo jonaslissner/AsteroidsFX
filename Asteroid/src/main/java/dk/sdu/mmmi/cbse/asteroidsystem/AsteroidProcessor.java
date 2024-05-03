@@ -38,7 +38,7 @@ public class AsteroidProcessor implements IEntityProcessingService {
                 asteroid.setY(asteroid.getY() % gameData.getDisplayHeight());
             }
             if(asteroid.getIsHit()) {
-                if(asteroid.getRadius() > 4) {
+                if(asteroid.getRadius() > 8) {
                     asteroidSplitter.splitAsteroid(asteroid, world);
                 }
                 world.removeEntity(asteroid);

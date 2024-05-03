@@ -12,7 +12,7 @@ import java.util.Random;
  * @author corfixen
  */
 public class AsteroidSplitterImpl implements AsteroidSplitter {
-    private static int SPLIT_SIZE = 1;
+    private static int SPLIT_SIZE = 3;
 
     @Override
     public void splitAsteroid(Entity e, World w) {

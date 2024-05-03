@@ -32,13 +32,25 @@ public class CollisionDetector implements IPostEntityProcessingService {
     }
 
     private void handleCollision(Entity e1, Entity e2, World world) {
-        // TODO handle no asteroid collision
+        if (e1 instanceof Asteroid && e2 instanceof Asteroid) {
+            return; // Ignore asteroid-asteroid collisions
+        }
+
         if (e1 instanceof Asteroid && e2 instanceof Bullet || e1 instanceof Bullet && e2 instanceof Asteroid) {
             handleBulletAsteroidCollision(e1, e2, world);
-        } else if (e1 instanceof Bullet || e2 instanceof Bullet) {
+            return;
+        }
+
+        if (e1 instanceof Bullet || e2 instanceof Bullet) {
             handleBulletShipCollision(e1, e2, world);
-        } else {
+            return;
+        }
+
+        handleShipAsteroidCollision(e1, e2, world);
+        if(!e1.getClass().getSimpleName().equals("Player")) {
             world.removeEntity(e1);
+        }
+        if(!e2.getClass().getSimpleName().equals("Player")) {
             world.removeEntity(e2);
         }
     }
@@ -51,11 +63,22 @@ public class CollisionDetector implements IPostEntityProcessingService {
     private void handleBulletShipCollision(Entity e1, Entity e2, World world) {
         Entity ship = e1 instanceof Bullet ? e2 : e1;
         if (!ship.getIsHit()) {
+            if(ship.getClass().getSimpleName().equals("Player")) {
+                return;
+            }
             ship.setIsHit(true);
             System.out.println(ship.getClass().getSimpleName() + " was hit!");
         } else {
             world.removeEntity(ship);
         }
         world.removeEntity(e1 instanceof Bullet ? e1 : e2);
+    }
+
+    private void handleShipAsteroidCollision(Entity e1, Entity e2, World world) {
+        Entity asteroid = e1 instanceof Asteroid ? e1 : e2;
+        Entity ship = e1 instanceof Asteroid ? e2 : e1;
+
+        asteroid.setIsHit(true);
+        world.removeEntity(ship);
     }
 }
