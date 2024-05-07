@@ -81,4 +81,5 @@ public class CollisionDetector implements IPostEntityProcessingService {
         asteroid.setIsHit(true);
         world.removeEntity(ship);
     }
+
 }

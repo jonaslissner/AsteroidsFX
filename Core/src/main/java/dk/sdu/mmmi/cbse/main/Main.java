@@ -16,6 +16,8 @@ import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import static java.util.stream.Collectors.toList;
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -23,14 +25,16 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class Main extends Application {
+    private final int FPS = 120;
 
     private final GameData gameData = new GameData();
     private final World world = new World();
     private final Map<Entity, Polygon> polygons = new ConcurrentHashMap<>();
     private Pane gameWindow;
-    
+    private Text score;
 
     public static void main(String[] args) {
         launch(Main.class);
@@ -38,10 +42,10 @@ public class Main extends Application {
 
     @Override
     public void start(Stage window) throws Exception {
-        Text text = new Text(10, 20, "Destroyed asteroids: 0");
+        score = new Text(10, 20, "Destroyed asteroids: 0");
         gameWindow = new Pane();
         gameWindow.setPrefSize(gameData.getDisplayWidth(), gameData.getDisplayHeight());
-        gameWindow.getChildren().add(text);
+        gameWindow.getChildren().add(score);
 
         Scene scene = new Scene(gameWindow);
         scene.setOnKeyPressed(event -> {
@@ -93,17 +97,23 @@ public class Main extends Application {
     }
 
     private void render() {
-        new AnimationTimer() {
-            private long then = 0;
+        Timeline gameLoop = new Timeline();
+        KeyFrame kf = new KeyFrame(
+                Duration.seconds(1.0 / FPS), // frame duration is 1/60th of a second
+                ae -> {
+                    double deltaTime = 1.0 / FPS; // delta time is fixed at 1/60th of a second
 
-            @Override
-            public void handle(long now) {
-                update();
-                draw();
-                gameData.getKeys().update();
-            }
+                    double fps = 1.0 / deltaTime;
+                    System.out.println("FPS: " + fps);
 
-        }.start();
+                    update();
+                    draw();
+                    gameData.getKeys().update();
+                });
+
+        gameLoop.getKeyFrames().add(kf);
+        gameLoop.setCycleCount(Timeline.INDEFINITE);
+        gameLoop.play();
     }
 
     private void update() {
@@ -118,6 +128,8 @@ public class Main extends Application {
     }
 
     private void draw() {
+        score.setText("Destroyed asteroids: " + gameData.getScore());
+
         for (Entity polygonEntity : polygons.keySet()) {
             if(!world.getEntities().contains(polygonEntity)){
                 Polygon removedPolygon = polygons.get(polygonEntity);

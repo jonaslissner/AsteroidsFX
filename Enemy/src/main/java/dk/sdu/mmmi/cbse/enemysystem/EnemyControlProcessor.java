@@ -13,6 +13,8 @@ import static java.util.stream.Collectors.toList;
 import java.util.Random;
 
 public class EnemyControlProcessor implements IEntityProcessingService {
+    private static final int MAX_ENEMIES = 2;
+    private static final int SPAWN_CHANCE = 1;
     private static final int RANDOM_DIRECTION_THRESHOLD = 25;
     private static final int STOP_TURNING_THRESHOLD = 25;
     private static final int SHOOT_THRESHOLD = 150;
@@ -20,6 +22,10 @@ public class EnemyControlProcessor implements IEntityProcessingService {
 
     @Override
     public void process(GameData gameData, World world) {
+        if (world.getEntities(Enemy.class).size() < MAX_ENEMIES && random.nextInt(100) >= SPAWN_CHANCE) {
+            world.addEntity(createEnemyShip(gameData));
+        }
+
         for (Entity e : world.getEntities(Enemy.class)) {
             Enemy enemy = (Enemy) e;
 
@@ -30,6 +36,18 @@ public class EnemyControlProcessor implements IEntityProcessingService {
 
         }
     }
+
+    private Entity createEnemyShip(GameData gameData) {
+
+        Entity enemyShip = new Enemy();
+        enemyShip.setPolygonCoordinates(-7,-7,14,0,-7,7);
+        enemyShip.setRotation(Math.random()*360);
+        enemyShip.setRadius(14);
+        enemyShip.setX(Math.random() * gameData.getDisplayHeight());
+        enemyShip.setY(Math.random() * gameData.getDisplayWidth());
+        return enemyShip;
+    }
+
     private void moveEnemy(Enemy enemy) {
         double changeX = Math.cos(Math.toRadians(enemy.getRotation()));
         double changeY = Math.sin(Math.toRadians(enemy.getRotation()));
