@@ -1,7 +1,7 @@
 package dk.sdu.mmmi.cbse.common.data;
 
 public class GameData {
-
+    private final int FPS = 120;
     private int displayWidth  = 800 ;
     private int displayHeight = 800;
     private final GameKeys keys = new GameKeys();
@@ -33,6 +33,10 @@ public class GameData {
     }
     public void incrementScore() {
         this.score++;
+    }
+
+    public int getFPS() {
+        return FPS;
     }
 
 }
