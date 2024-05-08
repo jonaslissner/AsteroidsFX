@@ -7,13 +7,21 @@ import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
+
+
+import java.lang.module.ModuleReference;
+import java.lang.module.Configuration;
+import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleDescriptor;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
 import static java.util.stream.Collectors.toList;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
@@ -35,9 +43,36 @@ public class Main extends Application {
     private final Map<Entity, Polygon> polygons = new ConcurrentHashMap<>();
     private Pane gameWindow;
     private Text score;
+    private static final List<ModuleLayer> layers = new ArrayList<>();
 
     public static void main(String[] args) {
+        Path pluginsDirectory = Paths.get("plugins");
+
+        if (!Files.exists(pluginsDirectory)) {
+            System.out.println("Plugins directory does not exist: " + pluginsDirectory.toAbsolutePath());
+            System.exit(1);
+        }
+
+        ModuleFinder pluginsFinder = ModuleFinder.of(pluginsDirectory);
+
+        List<ModuleLayer> layers = pluginsFinder.findAll().stream()
+                .map(ModuleReference::descriptor)
+                .map(ModuleDescriptor::name)
+                .map(name -> createModuleLayer(pluginsDirectory, name))
+                .collect(Collectors.toList());
+
+        // Print out modules loaded for debugging
+        layers.forEach(layer -> layer.modules().forEach(module ->
+                System.out.println("Module " + module.getName() + " loaded in layer " + layer)));
+
         launch(Main.class);
+    }
+
+    private static ModuleLayer createModuleLayer(Path pluginsDir, String moduleName) {
+        ModuleFinder finder = ModuleFinder.of(pluginsDir);
+        Configuration cf = ModuleLayer.boot().configuration().resolve(
+                finder, ModuleFinder.of(), Set.of(moduleName));
+        return ModuleLayer.boot().defineModulesWithOneLoader(cf, ClassLoader.getSystemClassLoader());
     }
 
     @Override
@@ -162,4 +197,6 @@ public class Main extends Application {
     private Collection<? extends IPostEntityProcessingService> getPostEntityProcessingServices() {
         return ServiceLoader.load(IPostEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
     }
+
+
 }
