@@ -16,7 +16,6 @@ public class AsteroidSplitterImpl implements AsteroidSplitter {
 
     @Override
     public void splitAsteroid(Entity e, World w) {
-        System.out.println("Splitting asteroid");
         Random rand = new Random();
 
         for (int i = 0; i < SPLIT_SIZE; i++) {
@@ -28,9 +27,11 @@ public class AsteroidSplitterImpl implements AsteroidSplitter {
             newAsteroid.setY(e.getY());
 
             double newRotation = e.getRotation() + (rand.nextInt(121) - 60);
-            System.out.println("New rotation: " + newRotation);
             newAsteroid.setRotation(newRotation);
             w.addEntity(newAsteroid);
         }
+    }
+    public int getSplitSize() {
+        return SPLIT_SIZE;
     }
 }

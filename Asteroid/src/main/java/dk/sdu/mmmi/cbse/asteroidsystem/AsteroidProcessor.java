@@ -10,13 +10,14 @@ import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import java.util.Random;
 
 public class AsteroidProcessor implements IEntityProcessingService {
-
+    private static final int ASTEROIDS_SPAWN_LIMIT = 10;
+    private static final int ASTEROIDS_SPLIT_MIN_SIZE = 8;
     private AsteroidSplitter asteroidSplitter = new AsteroidSplitterImpl();
     private Random rand = new Random();
 
     @Override
     public void process(GameData gameData, World world) {
-        if(world.getEntities(Asteroid.class).size() < 10) {
+        if(world.getEntities(Asteroid.class).size() <= ASTEROIDS_SPAWN_LIMIT) {
             world.addEntity(createAsteroid(gameData));
         }
 
@@ -43,7 +44,7 @@ public class AsteroidProcessor implements IEntityProcessingService {
                 asteroid.setY(asteroid.getY() % gameData.getDisplayHeight());
             }
             if(asteroid.getIsHit()) {
-                if(asteroid.getRadius() > 8) {
+                if(asteroid.getRadius() >= ASTEROIDS_SPLIT_MIN_SIZE) {
                     asteroidSplitter.splitAsteroid(asteroid, world);
                 } else {
                     gameData.incrementScore();
@@ -53,7 +54,7 @@ public class AsteroidProcessor implements IEntityProcessingService {
         }
 
     }
-    public Entity createAsteroid(GameData gameData) {
+    private Entity createAsteroid(GameData gameData) {
         Entity asteroid = new Asteroid();
         int size = this.rand.nextInt(20) + 7;
         asteroid.setRadius(size);
@@ -63,6 +64,12 @@ public class AsteroidProcessor implements IEntityProcessingService {
         asteroid.setRotation(rand.nextInt(360));
 
         return asteroid;
+    }
+    public int getAsteroidsSpawnLimit() {
+        return ASTEROIDS_SPAWN_LIMIT;
+    }
+    public int getAsteroidSplitMinSize() {
+        return ASTEROIDS_SPLIT_MIN_SIZE;
     }
 
     /**

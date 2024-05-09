@@ -8,8 +8,7 @@ import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AsteroidPluginTests{
 
@@ -18,36 +17,39 @@ public class AsteroidPluginTests{
     private World world;
 
     @BeforeEach
-    public void setUpTest() {
+    public void testSetup() {
         this.gameData = new GameData();
         this.world = new World();
         this.asteroidPlugin = new AsteroidPlugin();
     }
 
     @Test
-    public void testNoAsteroidsOnStart() {
-        // Given
-        int amountOfAsteroidsOnStart = 0;
+    public void shouldHaveNoAsteroidsOnStart() {
+        // Arrange
+        int expectedAsteroidsCount = 0;
 
-        // When
+        // Act
         asteroidPlugin.start(gameData, world);
+        int actualAsteroidsCount = world.getEntities(Asteroid.class).size();
 
-        // Then
-        assert (world.getEntities(Asteroid.class).size() == amountOfAsteroidsOnStart);
+        // Assert
+        assertEquals(expectedAsteroidsCount, actualAsteroidsCount, "Asteroids should not be present after start.");
     }
 
     @Test
-    public void testAsteroidsRemovedOnStop() {
-        // Given
-        asteroidPlugin.start(gameData, world);
-
-        // When
+    public void shouldRemoveAllAsteroidsOnStop() {
+        // Arrange
         world.addEntity(new Asteroid());
-        assertTrue(world.getEntities(Asteroid.class).size() > 0);
-        asteroidPlugin.stop(gameData, world);
+        world.addEntity(new Asteroid());
+        int asteroidsCountBeforeStop = world.getEntities(Asteroid.class).size();
 
-        // Then
-        assert (world.getEntities(Asteroid.class).size() == 0);
+        // Act
+        asteroidPlugin.stop(gameData, world);
+        int asteroidsCountAfterStop = world.getEntities(Asteroid.class).size();
+
+        // Assert
+        assertEquals(2, asteroidsCountBeforeStop, "There should be two asteroids before stop is called.");
+        assertEquals(0, asteroidsCountAfterStop, "All asteroids should be removed on stop.");
     }
 
 }

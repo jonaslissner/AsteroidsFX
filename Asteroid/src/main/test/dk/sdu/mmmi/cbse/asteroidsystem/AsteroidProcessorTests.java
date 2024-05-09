@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class AsteroidProcessorTests {
 
@@ -15,6 +17,8 @@ public class AsteroidProcessorTests {
     private World world;
     private Asteroid asteroid;
     private AsteroidProcessor asteroidProcessor;
+    private int asteroidsSpawnLimit;
+    private int asteroidSplitMinSize;
 
     @BeforeEach
     public void testSetup() {
@@ -22,51 +26,80 @@ public class AsteroidProcessorTests {
         this.world = new World();
         this.asteroid = new Asteroid();
         this.asteroidProcessor = new AsteroidProcessor();
+        this.asteroidsSpawnLimit = asteroidProcessor.getAsteroidsSpawnLimit();
+        this.asteroidSplitMinSize = asteroidProcessor.getAsteroidSplitMinSize();
         world.addEntity(asteroid);
     }
 
     @Test
-    public void testAsteroidMovement() {
-        // Given
-        double enemyPosX = asteroid.getX();
-        double enemyPosY = asteroid.getY();
+    public void shouldMoveAsteroids() {
+        double initialPosX = asteroid.getX();
+        double initialPosY = asteroid.getY();
+        double expectedPosX = (initialPosX + Math.cos(Math.toRadians(asteroid.getRotation())) * 0.5) % gameData.getDisplayWidth();
+        double expectedPosY = (initialPosY + Math.sin(Math.toRadians(asteroid.getRotation())) * 0.5) % gameData.getDisplayHeight();
 
-        // When
         asteroidProcessor.process(gameData, world);
 
-        // Then
-        boolean asteroidMoved = (enemyPosX != asteroid.getX()) || (enemyPosY != asteroid.getY());
-        Assertions.assertTrue(asteroidMoved);
+        assertTrue(asteroid.getX() == expectedPosX && asteroid.getY() == expectedPosY, "Asteroid should move according to its rotation.");
     }
 
     @Test
-    public void testAsteroidsSpawn() {
-        // Given
-        int amountOfAsteroids = world.getEntities(Asteroid.class).size();
+    public void shouldSpawnNewAsteroidIfUnderLimit() {
+        // Arrange
+        for (int i = 0; i < asteroidsSpawnLimit - 1; i++) {
+            world.addEntity(new Asteroid());
+        }
+        int initialCount = world.getEntities(Asteroid.class).size();
 
-        // When
-        world.addEntity(asteroidProcessor.createAsteroid(gameData));
+        // Act
         asteroidProcessor.process(gameData, world);
 
-        // Then
-        boolean asteroidsSpawned = amountOfAsteroids < world.getEntities(Asteroid.class).size();
-        Assertions.assertTrue(asteroidsSpawned);
+        // Assert
+        assertEquals(initialCount + 1, world.getEntities(Asteroid.class).size(), "Should spawn one new asteroid when under limit.");
     }
 
     @Test
-    public void testAsteroidCanSplit() {
-        // Given
-        int amountOfAsteroids = world.getEntities(Asteroid.class).size();
-        this.asteroid.setRadius(10);
-        System.out.println(amountOfAsteroids);
+    public void shouldNotSpawnNewAsteroidIfAtLimit() {
+        // Arrange
+        for (int i = 0; i < asteroidsSpawnLimit; i++) {
+            world.addEntity(new Asteroid());
+        }
+        int initialCount = world.getEntities(Asteroid.class).size();
 
-        // When
+        // Act
+        asteroidProcessor.process(gameData, world);
+
+        // Assert
+        assertEquals(initialCount, world.getEntities(Asteroid.class).size(), "Should not spawn new asteroids when at limit.");
+    }
+
+    @Test
+    public void shouldSplitLargeAsteroidsIfHit() {
+        // Arrange
+        int amountOfAsteroids = world.getEntities(Asteroid.class).size();
+        this.asteroid.setRadius(asteroidSplitMinSize);
+
+        // Act
         this.asteroid.setIsHit(true);
-        asteroidProcessor.process(gameData, world);
+        asteroidProcessor.process(gameData, world); // one new is also created as total amount of asteroids is below 10
+
+        // Assert
+        assertEquals(amountOfAsteroids + 3, world.getEntities(Asteroid.class).size(), "Should split large asteroids when hit.");
+    }
+
+    @Test
+    public void shouldRemoveSmallAsteroidsIfHit() {
+        // Arrange
+        int amountOfAsteroids = world.getEntities(Asteroid.class).size();
+        this.asteroid.setRadius(asteroidSplitMinSize - 1);
+
+        // Act
+        this.asteroid.setIsHit(true);
+        asteroidProcessor.process(gameData, world); // one new is also created as total amount of asteroids is below 10
         System.out.println(world.getEntities(Asteroid.class).size());
 
-        // Then
-        Assertions.assertTrue(amountOfAsteroids + 3 == world.getEntities(Asteroid.class).size());
+        // Assert
+        assertEquals(amountOfAsteroids, world.getEntities(Asteroid.class).size(), "Should remove small asteroids when hit.");
     }
 
     /**
