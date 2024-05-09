@@ -1,5 +1,5 @@
-dk\sdu\mmmi\cbse\asteroidsystem\AsteroidProcessor.class
-dk\sdu\mmmi\cbse\asteroidsystem\AsteroidSplitterImpl.class
+dk/sdu/mmmi/cbse/asteroidsystem/AsteroidProcessor.class
+dk/sdu/mmmi/cbse/splitpackage/Split.class
 module-info.class
-dk\sdu\mmmi\cbse\asteroidsystem\AsteroidPlugin.class
-dk\sdu\mmmi\cbse\splitpackage\Split.class
+dk/sdu/mmmi/cbse/asteroidsystem/AsteroidSplitterImpl.class
+dk/sdu/mmmi/cbse/asteroidsystem/AsteroidPlugin.class

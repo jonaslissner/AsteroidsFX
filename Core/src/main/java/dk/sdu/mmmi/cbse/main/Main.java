@@ -43,36 +43,48 @@ public class Main extends Application {
     private final Map<Entity, Polygon> polygons = new ConcurrentHashMap<>();
     private Pane gameWindow;
     private Text score;
-    private static final List<ModuleLayer> layers = new ArrayList<>();
+    private static ModuleLayer layer;
+
+    private Collection<? extends IGamePluginService> iGamePluginServices;
+    private Collection<? extends IEntityProcessingService> iEntityProcessingServices;
+    private Collection<? extends IPostEntityProcessingService> iPostEntityProcessingServices;
 
     public static void main(String[] args) {
-        Path pluginsDirectory = Paths.get("plugins");
+        Path pluginsDir = Paths.get("plugins"); // Directory with plugins JARs
 
-        if (!Files.exists(pluginsDirectory)) {
-            System.out.println("Plugins directory does not exist: " + pluginsDirectory.toAbsolutePath());
-            System.exit(1);
-        }
+        // Search for plugins in the plugins directory
+        ModuleFinder pluginsFinder = ModuleFinder.of(pluginsDir);
 
-        ModuleFinder pluginsFinder = ModuleFinder.of(pluginsDirectory);
-
-        List<ModuleLayer> layers = pluginsFinder.findAll().stream()
+        // Find all names of all found plugin modules
+        List<String> plugins = pluginsFinder
+                .findAll()
+                .stream()
                 .map(ModuleReference::descriptor)
                 .map(ModuleDescriptor::name)
-                .map(name -> createModuleLayer(pluginsDirectory, name))
                 .collect(Collectors.toList());
 
-        // Print out modules loaded for debugging
-        layers.forEach(layer -> layer.modules().forEach(module ->
-                System.out.println("Module " + module.getName() + " loaded in layer " + layer)));
+        // Create configuration that will resolve plugin modules
+        // (verify that the graph of modules is correct)
+        Configuration pluginsConfiguration = ModuleLayer
+                .boot()
+                .configuration()
+                .resolve(pluginsFinder, ModuleFinder.of(), plugins);
+
+        // Create a module layer for plugins
+        layer = ModuleLayer
+                .boot()
+                .defineModulesWithOneLoader(pluginsConfiguration, ClassLoader.getSystemClassLoader());
 
         launch(Main.class);
     }
 
-    private static ModuleLayer createModuleLayer(Path pluginsDir, String moduleName) {
-        ModuleFinder finder = ModuleFinder.of(pluginsDir);
-        Configuration cf = ModuleLayer.boot().configuration().resolve(
-                finder, ModuleFinder.of(), Set.of(moduleName));
-        return ModuleLayer.boot().defineModulesWithOneLoader(cf, ClassLoader.getSystemClassLoader());
+    private static ModuleLayer createLayer(String from, String module) {
+        System.out.println("Layer created");
+
+        var finder = ModuleFinder.of(Paths.get(from));
+        var parent = ModuleLayer.boot();
+        var cf = parent.configuration().resolve(finder, ModuleFinder.of(), Set.of(module));
+        return parent.defineModulesWithOneLoader(cf, ClassLoader.getSystemClassLoader());
     }
 
     @Override
@@ -187,15 +199,15 @@ public class Main extends Application {
     }
 
     private Collection<? extends IGamePluginService> getPluginServices() {
-        return ServiceLoader.load(IGamePluginService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
+        return ServiceLoader.load(layer, IGamePluginService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
     }
 
     private Collection<? extends IEntityProcessingService> getEntityProcessingServices() {
-        return ServiceLoader.load(IEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
+        return ServiceLoader.load(layer, IEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
     }
 
     private Collection<? extends IPostEntityProcessingService> getPostEntityProcessingServices() {
-        return ServiceLoader.load(IPostEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
+        return ServiceLoader.load(layer, IPostEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
     }
 
 
