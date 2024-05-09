@@ -53,7 +53,7 @@ public class AsteroidProcessor implements IEntityProcessingService {
         }
 
     }
-    private Entity createAsteroid(GameData gameData) {
+    public Entity createAsteroid(GameData gameData) {
         Entity asteroid = new Asteroid();
         int size = this.rand.nextInt(20) + 7;
         asteroid.setRadius(size);
