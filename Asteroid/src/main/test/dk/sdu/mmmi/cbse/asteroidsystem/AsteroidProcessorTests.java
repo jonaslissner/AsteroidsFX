@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Random;
 
 public class AsteroidProcessorTests {
 
@@ -18,7 +17,7 @@ public class AsteroidProcessorTests {
     private AsteroidProcessor asteroidProcessor;
 
     @BeforeEach
-    public void setUpTest() {
+    public void testSetup() {
         this.gameData = new GameData();
         this.world = new World();
         this.asteroid = new Asteroid();
@@ -26,7 +25,6 @@ public class AsteroidProcessorTests {
         world.addEntity(asteroid);
     }
 
-    // Test that enemy moves when processed
     @Test
     public void testAsteroidMovement() {
         // Given
@@ -41,7 +39,6 @@ public class AsteroidProcessorTests {
         Assertions.assertTrue(asteroidMoved);
     }
 
-    // Test that enemy can be spawned
     @Test
     public void testAsteroidsSpawn() {
         // Given
@@ -56,22 +53,20 @@ public class AsteroidProcessorTests {
         Assertions.assertTrue(asteroidsSpawned);
     }
 
-    // Test that enemy can be spawned
     @Test
     public void testAsteroidCanSplit() {
         // Given
         int amountOfAsteroids = world.getEntities(Asteroid.class).size();
+        this.asteroid.setRadius(10);
         System.out.println(amountOfAsteroids);
 
         // When
-        Asteroid asteroid = (Asteroid) asteroidProcessor.createAsteroid(gameData);
-        world.addEntity(asteroid);
-        asteroid.setIsHit(true);
+        this.asteroid.setIsHit(true);
         asteroidProcessor.process(gameData, world);
         System.out.println(world.getEntities(Asteroid.class).size());
 
         // Then
-        Assertions.assertTrue(amountOfAsteroids + 4 == world.getEntities(Asteroid.class).size());
+        Assertions.assertTrue(amountOfAsteroids + 3 == world.getEntities(Asteroid.class).size());
     }
 
     /**
