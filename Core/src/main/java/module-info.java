@@ -4,7 +4,6 @@ module Core {
     requires spring.beans;
     requires spring.aop;
     requires spring.expression;
-    requires commons.logging;
     requires Common;
     requires CommonBullet;
     requires CommonAsteroid;
