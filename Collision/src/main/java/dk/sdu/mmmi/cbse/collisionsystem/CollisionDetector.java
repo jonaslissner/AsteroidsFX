@@ -47,12 +47,7 @@ public class CollisionDetector implements IPostEntityProcessingService {
         }
 
         handleShipAsteroidCollision(e1, e2, world);
-        if(!e1.getClass().getSimpleName().equals("Player")) {
-            world.removeEntity(e1);
-        }
-        if(!e2.getClass().getSimpleName().equals("Player")) {
-            world.removeEntity(e2);
-        }
+        handleShipShipCollision(e1, e2, world);
     }
     private void handleBulletAsteroidCollision(Entity e1, Entity e2, World world) {
         Asteroid asteroid = e1 instanceof Asteroid ? (Asteroid) e1 : (Asteroid) e2;
@@ -63,11 +58,7 @@ public class CollisionDetector implements IPostEntityProcessingService {
     private void handleBulletShipCollision(Entity e1, Entity e2, World world) {
         Entity ship = e1 instanceof Bullet ? e2 : e1;
         if (!ship.getIsHit()) {
-            if(ship.getClass().getSimpleName().equals("Player")) {
-                return;
-            }
             ship.setIsHit(true);
-            System.out.println(ship.getClass().getSimpleName() + " was hit!");
         } else {
             world.removeEntity(ship);
         }
@@ -82,4 +73,11 @@ public class CollisionDetector implements IPostEntityProcessingService {
         world.removeEntity(ship);
     }
 
+    private void handleShipShipCollision(Entity e1, Entity e2, World world) {
+        if((e1.getClass().getSimpleName().equals("Player") || e2.getClass().getSimpleName().equals("Enemy")) ||
+                (e1.getClass().getSimpleName().equals("Enemy") || e2.getClass().getSimpleName().equals("Player"))) {
+            world.removeEntity(e1);
+            world.removeEntity(e2);
+        }
+    }
 }
